@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import { errorHandler } from './middlewares/error.middleware';
 
 // Import Routes
 import authRoutes from './routes/auth.routes';
@@ -8,10 +12,20 @@ import masterRoutes from './routes/master.routes';
 
 const app = express();
 
-// Middleware dasar
+// Konfigurasi Rate Limiter Global (Batasan 100 hit per 15 menit)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
+  message: { error: 'Terlalu banyak request, silakan coba lagi dalam 15 menit.' }
+});
+
+// Middleware dasar & Security
+app.use(helmet()); // Mencegah XSS & Hide Express header
+app.use(morgan('dev')); // Logger traffic
 app.use(cors()); // Allow Origin Flutter/Web
 app.use(express.json()); // Allow Parsing JSON
 app.use(express.urlencoded({ extended: true }));
+app.use(limiter); // Pasang limiter ke seluruh network
 
 // Rute Basic Cek Server
 app.get('/', (req, res) => {
@@ -27,6 +41,9 @@ app.use('/api/master', masterRoutes);
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Endpoint tidak ditemukan' });
 });
+
+// Error handling mask 
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
