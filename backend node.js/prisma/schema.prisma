@@ -1,13 +1,104 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum user_roles {
+  admin
+  safety
+  csr
+  employee
+}
+
+enum trans_types {
+  Check_in  @map("Check-in")
+  Check_out @map("Check-out")
+  Izin
+  Sakit
+}
+
+model users {
+  nrp           String      @id @db.VarChar(255)
+  password_hash String      @db.VarChar(255)
+  role          user_roles
+  is_active     Boolean     @default(true)
+  employee      employees?
+}
+
+model mitra_kerja {
+  mitra_kerja_id   Int         @id @default(autoincrement())
+  mitra_kerja_name String      @db.VarChar(255)
+  latitude         Decimal?    @db.Decimal(10, 8)
+  longitude        Decimal?    @db.Decimal(11, 8)
+  radius_meters    Int         @default(50)
+  
+  employees        employees[]
+}
+
+model departments {
+  dept_id   Int         @id @default(autoincrement())
+  dept_name String      @db.VarChar(255)
+  divisions divisions[]
+}
+
+model divisions {
+  div_id    Int         @id @default(autoincrement())
+  div_name  String      @db.VarChar(255)
+  dept_id   Int
+  
+  department departments  @relation(fields: [dept_id], references: [dept_id])
+  employees  employees[]
+}
+
+model positions {
+  pos_id    Int         @id @default(autoincrement())
+  pos_name  String      @db.VarChar(255)
+  employees employees[]
+}
+
+model employees {
+  nrp                   String        @id @db.VarChar(255)
+  full_name             String        @db.VarChar(255)
+  pos_id                Int?
+  div_id                Int?
+  mitra_kerja_id        Int?
+  default_work_location String?       @db.VarChar(255)
+  
+  user                  users         @relation(fields: [nrp], references: [nrp])
+  position              positions?    @relation(fields: [pos_id], references: [pos_id])
+  division              divisions?    @relation(fields: [div_id], references: [div_id])
+  mitra_kerja           mitra_kerja?  @relation(fields: [mitra_kerja_id], references: [mitra_kerja_id])
+  attendances           attendances[]
+}
+
+model shifts {
+  shift_id          Int           @id @default(autoincrement())
+  shift_code        String        @db.VarChar(255)
+  time_in_expected  DateTime      @db.Time
+  time_out_expected DateTime      @db.Time
+  attendances       attendances[]
+}
+
+model attendances {
+  att_id        String      @id @default(uuid())
+  nrp           String      @db.VarChar(255)
+  attendance_date DateTime  @db.Date
+  time_wita     DateTime    @db.Time
+  time_wib      DateTime    @db.Time
+  shift_id      Int
+  trans_type    trans_types
+  cp_location   String?     @db.VarChar(255)
+  work_location String?     @db.VarChar(255)
+  att_latitude  Decimal?    @db.Decimal(10, 8)
+  att_longitude Decimal?    @db.Decimal(11, 8)
+  att_map_link  String?     @db.Text
+  photo_evidence String?    @db.VarChar(255)
+  device_ip     String?     @db.VarChar(45)
+
+  employee      employees   @relation(fields: [nrp], references: [nrp])
+  shift         shifts      @relation(fields: [shift_id], references: [shift_id])
 }
