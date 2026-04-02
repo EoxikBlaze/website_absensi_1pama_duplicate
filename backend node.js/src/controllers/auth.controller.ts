@@ -47,6 +47,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
   } catch (error) {
     console.error('Error in login auth:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
+    res.status(500).json({ error: 'Terjadi kesalahan pada server: ' + (error instanceof Error ? error.message : String(error)) });
   }
 };

@@ -28,13 +28,14 @@ class AuthController extends Controller
 
                 // Store token and user data in session
                 Session::put('api_token', $data['token'] ?? null);
-                Session::put('user', $data['data'] ?? null);
+                Session::put('user', $data['user'] ?? null);
 
-                return redirect()->intended('/')->with('success', 'Berhasil login!');
+                return redirect()->intended('/select-profile')->with('success', 'Berhasil login!');
             }
 
+            $apiError = $response->json('error') ?? $response->json('message') ?? 'Unauthorized';
             return back()->withErrors([
-                'nrp' => 'NRP atau Password salah. Peringatan SERVER: ' . ($response->json('message') ?? 'Unauthorized'),
+                'nrp' => 'NRP atau Password salah. Peringatan SERVER: ' . $apiError,
             ]);
 
         } catch (\Exception $e) {
@@ -42,6 +43,47 @@ class AuthController extends Controller
                 'nrp' => 'Gagal terhubung ke API Node.js: ' . $e->getMessage(),
             ]);
         }
+    }
+
+    public function selectProfileView()
+    {
+        // Pastikan user sudah memiliki sesi login
+        if (!Session::has('api_token')) {
+            return redirect('/login')->withErrors(['nrp' => 'Silakan login terlebih dahulu.']);
+        }
+
+        return view('auth.select-profile');
+    }
+
+    public function selectProfilePost(Request $request)
+    {
+        // Validasi isian profile dan site
+        $request->validate([
+            'profile' => 'required|string',
+            'site' => 'required|string'
+        ]);
+
+        // Setelah divalidasi, simpan opsi ini ke session (opsional, tergantung kebutuhan realnya)
+        Session::put('selected_profile', $request->profile);
+        Session::put('selected_site', $request->site);
+
+        // Setelah selesai, akan diarahkan ke dashboard
+        return redirect('/')->with('success', 'Profil berhasil dipilih!');
+    }
+
+    public function dashboard()
+    {
+        // Pastikan sudah ada sesi dari API backend
+        if (!Session::has('api_token')) {
+            return redirect('/login')->withErrors(['nrp' => 'Silakan login terlebih dahulu.']);
+        }
+
+        // Jika profile & site belum dipilih, paksa kembali ke halaman select profile
+        if (!Session::has('selected_profile')) {
+            return redirect('/select-profile')->withErrors(['nrp' => 'Anda harus menyeleksi profil terlebih dahulu.']);
+        }
+
+        return view('dashboard');
     }
 
     public function logout()

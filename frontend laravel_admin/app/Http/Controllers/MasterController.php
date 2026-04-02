@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+
+class MasterController extends Controller
+{
+    private $baseUrl = 'http://localhost:3000/api/master';
+
+    private function getHeaders()
+    {
+        return [
+            'Authorization' => 'Bearer ' . Session::get('api_token'),
+            'Accept' => 'application/json',
+        ];
+    }
+
+    // ==========================================
+    // SHIFTS
+    // ==========================================
+    public function shifts()
+    {
+        if (!Session::has('api_token')) return redirect('/login');
+        
+        $response = Http::withHeaders($this->getHeaders())->get("{$this->baseUrl}/shifts");
+        $shifts = $response->successful() ? $response->json() : [];
+        
+        return view('master.shifts', compact('shifts'));
+    }
+
+    public function storeShift(Request $request)
+    {
+        $response = Http::withHeaders($this->getHeaders())->post("{$this->baseUrl}/shifts", $request->all());
+        if ($response->successful()) {
+            return redirect()->back()->with('success', 'Shift berhasil ditambahkan!');
+        }
+        return redirect()->back()->withErrors(['error' => 'Gagal menambah shift: ' . $response->body()]);
+    }
+
+    public function updateShift(Request $request, $id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->put("{$this->baseUrl}/shifts/{$id}", $request->all());
+        if ($response->successful()) {
+            return redirect()->back()->with('success', 'Shift berhasil diperbarui!');
+        }
+        return redirect()->back()->withErrors(['error' => 'Gagal memperbarui shift: ' . $response->body()]);
+    }
+
+    public function destroyShift($id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->delete("{$this->baseUrl}/shifts/{$id}");
+        if ($response->successful()) {
+            return redirect()->back()->with('success', 'Shift berhasil dihapus permanen!');
+        }
+        return redirect()->back()->withErrors(['error' => 'Gagal menghapus shift: ' . $response->body()]);
+    }
+
+    // ==========================================
+    // DEPARTMENTS
+    // ==========================================
+    public function departments()
+    {
+        if (!Session::has('api_token')) return redirect('/login');
+        
+        $response = Http::withHeaders($this->getHeaders())->get("{$this->baseUrl}/departments");
+        $departments = $response->successful() ? $response->json() : [];
+        
+        return view('master.departments', compact('departments'));
+    }
+
+    public function storeDepartment(Request $request)
+    {
+        $response = Http::withHeaders($this->getHeaders())->post("{$this->baseUrl}/departments", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Departemen berhasil ditambahkan!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menambah departemen: ' . $response->body()]);
+    }
+
+    public function updateDepartment(Request $request, $id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->put("{$this->baseUrl}/departments/{$id}", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Departemen berhasil diperbarui!')
+            : redirect()->back()->withErrors(['error' => 'Gagal memperbarui departemen: ' . $response->body()]);
+    }
+
+    public function destroyDepartment($id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->delete("{$this->baseUrl}/departments/{$id}");
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Departemen berhasil dihapus!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menghapus departemen: ' . $response->body()]);
+    }
+
+    // ==========================================
+    // DIVISIONS
+    // ==========================================
+    public function storeDivision(Request $request)
+    {
+        $response = Http::withHeaders($this->getHeaders())->post("{$this->baseUrl}/divisions", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Divisi berhasil ditambahkan!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menambah divisi: ' . $response->body()]);
+    }
+
+    public function updateDivision(Request $request, $id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->put("{$this->baseUrl}/divisions/{$id}", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Divisi berhasil diperbarui!')
+            : redirect()->back()->withErrors(['error' => 'Gagal memperbarui divisi: ' . $response->body()]);
+    }
+
+    public function destroyDivision($id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->delete("{$this->baseUrl}/divisions/{$id}");
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Divisi berhasil dihapus!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menghapus divisi: ' . $response->body()]);
+    }
+
+    // ==========================================
+    // POSITIONS
+    // ==========================================
+    public function positions()
+    {
+        if (!Session::has('api_token')) return redirect('/login');
+        
+        $response = Http::withHeaders($this->getHeaders())->get("{$this->baseUrl}/positions");
+        $positions = $response->successful() ? $response->json() : [];
+        
+        return view('master.positions', compact('positions'));
+    }
+
+    public function storePosition(Request $request)
+    {
+        $response = Http::withHeaders($this->getHeaders())->post("{$this->baseUrl}/positions", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Jabatan berhasil ditambahkan!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menambah jabatan: ' . $response->body()]);
+    }
+
+    public function updatePosition(Request $request, $id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->put("{$this->baseUrl}/positions/{$id}", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Jabatan berhasil diperbarui!')
+            : redirect()->back()->withErrors(['error' => 'Gagal memperbarui jabatan: ' . $response->body()]);
+    }
+
+    public function destroyPosition($id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->delete("{$this->baseUrl}/positions/{$id}");
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Jabatan berhasil dihapus!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menghapus jabatan: ' . $response->body()]);
+    }
+
+    // ==========================================
+    // MITRA KERJA (PERUSAHAAN SUBCONTRACTOR)
+    // ==========================================
+    public function mitra()
+    {
+        if (!Session::has('api_token')) return redirect('/login');
+        
+        $response = Http::withHeaders($this->getHeaders())->get("http://localhost:3000/api/master/mitra-kerja");
+        $mitras = $response->successful() ? $response->json() : [];
+        
+        return view('master.mitra', compact('mitras'));
+    }
+
+    public function storeMitra(Request $request)
+    {
+        $response = Http::withHeaders($this->getHeaders())->post("http://localhost:3000/api/master/mitra-kerja", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Perusahaan Subcontractor berhasil ditambahkan!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menambah perusahaan: ' . $response->body()]);
+    }
+
+    public function updateMitra(Request $request, $id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->put("http://localhost:3000/api/master/mitra-kerja/{$id}", $request->all());
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Nama Perusahaan berhasil diperbarui!')
+            : redirect()->back()->withErrors(['error' => 'Gagal memperbarui perusahaan: ' . $response->body()]);
+    }
+
+    public function destroyMitra($id)
+    {
+        $response = Http::withHeaders($this->getHeaders())->delete("http://localhost:3000/api/master/mitra-kerja/{$id}");
+        return $response->successful() 
+            ? redirect()->back()->with('success', 'Perusahaan Subcontractor berhasil dihapus!')
+            : redirect()->back()->withErrors(['error' => 'Gagal menghapus perusahaan: ' . $response->body()]);
+    }
+}

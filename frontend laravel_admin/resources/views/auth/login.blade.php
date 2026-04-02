@@ -15,6 +15,10 @@
     }
   </style>
 <style data-purpose="custom-layout">
+    .bg-pattern {
+      background-image: radial-gradient(#d1d5db 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+    }
     .login-card {
       box-shadow: 0 10px 50px rgba(0, 0, 0, 0.05);
       border-radius: 2.5rem;
@@ -30,7 +34,7 @@
     }
   </style>
 </head>
-<body class="bg-[#f8f9fb] min-h-screen flex flex-col">
+<body class="bg-[#f8f9fb] bg-pattern min-h-screen flex flex-col">
 <!-- BEGIN: MainContent -->
 <main class="flex-grow flex items-center justify-center p-4">
 <!-- BEGIN: LoginCard -->
@@ -76,22 +80,22 @@
 <div class="flex flex-col">
 <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1">Username / PNRP</label>
 <div class="relative flex items-center">
-<span class="absolute left-4 text-gray-400">
+<span class="absolute left-4 text-gray-500">
 <i class="w-4 h-4" data-lucide="user"></i>
 </span>
-<input name="nrp" value="{{ old('nrp') }}" required class="input-field-container w-full border border-gray-100 rounded-lg py-4 pl-11 pr-4 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-300" placeholder="Enter your NRP" type="text"/>
+<input name="nrp" value="{{ old('nrp') }}" required class="input-field-container w-full border border-gray-100 rounded-lg py-4 pl-11 pr-4 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-500" placeholder="Enter your NRP" type="text"/>
 </div>
 </div>
 <!-- Password Field -->
 <div class="flex flex-col">
 <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1">Password</label>
 <div class="relative flex items-center">
-<span class="absolute left-4 text-gray-400">
+<span class="absolute left-4 text-gray-500">
 <i class="w-4 h-4" data-lucide="lock"></i>
 </span>
-<input name="password" required class="input-field-container w-full border border-gray-100 rounded-lg py-4 pl-11 pr-11 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-400" type="password" placeholder="********"/>
-<button class="absolute right-4 text-gray-400 hover:text-gray-600" type="button">
-<i class="w-4 h-4" data-lucide="eye"></i>
+<input id="passwordInput" name="password" required class="input-field-container w-full border border-gray-100 rounded-lg py-4 pl-11 pr-11 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-black placeholder:text-gray-500" type="password" placeholder="********"/>
+<button id="togglePassword" class="absolute right-4 text-gray-500 hover:text-gray-700 transition-colors" type="button" aria-label="Toggle password visibility">
+<i id="toggleIcon" class="w-4 h-4" data-lucide="eye"></i>
 </button>
 </div>
 </div>
@@ -99,10 +103,10 @@
 <div class="flex flex-col">
 <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1">Domain</label>
 <div class="relative flex items-center">
-<span class="absolute left-4 text-[#5c6ea3]">
+<span class="absolute left-4 text-gray-500">
 <i class="w-4 h-4" data-lucide="building-2"></i>
 </span>
-<input class="domain-field w-full border-none rounded-lg py-4 pl-11 pr-4 text-sm text-[#5c6ea3] font-medium focus:ring-0 cursor-default" readonly="" type="text" value="Pamapersada"/>
+<input class="domain-field w-full border-none rounded-lg py-4 pl-11 pr-4 text-sm text-gray-500 font-medium focus:ring-0 cursor-default" readonly="" type="text" value="Pamapersada"/>
 </div>
 </div>
 </div>
@@ -135,6 +139,30 @@
 <!-- END: MainFooter -->
 <!-- Initialize Icons -->
 <script data-purpose="icon-initialization">
+    // Refresh the initial icons
     lucide.createIcons();
+
+    // Toggle Password Visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('passwordInput');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function () {
+            // Check the current type and toggle
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            // Change icon
+            if (type === 'text') {
+                toggleIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                toggleIcon.setAttribute('data-lucide', 'eye');
+            }
+            
+            // Re-render all lucide icons
+            lucide.createIcons();
+        });
+    }
   </script>
 </body></html>
